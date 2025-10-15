@@ -1,0 +1,9 @@
+python
+fastapi
+uvicorn
+pydantic
+duckdb
+pandas
+requests
+rapidfuzz
+
