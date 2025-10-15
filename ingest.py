@@ -79,6 +79,17 @@ def get_winner(info: dict, team1: str, team2: str):
     if team2 and norm(team2) in n_cand: return team2
     return cand
 
+def normalize_season(season: str):
+    """Known IPL cross-year season formats to single-year equivalents."""
+    if not season:
+        return season
+    season = str(season).strip()
+    mapping = {
+        "2007/08": "2008",
+        "2009/10": "2009",
+        "2020/21": "2020",
+    }
+    return mapping.get(season, season)
 def parse_info_csv(path: str) -> Dict:
     """
     Parses info from info file about match like umpires, players, venue, winner etc.
@@ -415,6 +426,7 @@ def main():
             try:
                 deliveries = parse_deliveries_csv(deliveries_path)
                 meta = parse_info_csv(info_path)
+                meta["season"] = normalize_season(meta.get("season"))
                 if "match_id" in deliveries.columns and pd.notna(deliveries["match_id"].iloc[0]):
                     meta["match_id"] = int(str(deliveries["match_id"].iloc[0]))
                 upsert_match(con, deliveries, meta)
@@ -433,6 +445,7 @@ def main():
         # SINGLE-PAIR INGEST
         deliveries = parse_deliveries_csv(args.match)
         meta = parse_info_csv(args.info)
+        meta["season"] = normalize_season(meta.get("season"))
         if "match_id" in deliveries.columns and pd.notna(deliveries["match_id"].iloc[0]):
             meta["match_id"] = int(str(deliveries["match_id"].iloc[0]))
         upsert_match(con, deliveries, meta)
